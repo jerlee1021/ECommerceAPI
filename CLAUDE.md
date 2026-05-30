@@ -128,7 +128,7 @@ Do not add tables or columns unless the user explicitly asks.
 
 Track progress here as the project develops. Update this section as each phase is completed.
 
-- [ ] Flask app initialised
+- [x] Flask app initialised
 - [ ] Database models defined
 - [ ] Alembic configured
 - [ ] Auth endpoints working
@@ -136,3 +136,25 @@ Track progress here as the project develops. Update this section as each phase i
 - [ ] Product endpoints working
 - [ ] Cart endpoints working
 - [ ] Stripe integration working
+
+## Session notes — where we left off
+
+### Completed this session
+- Installed all dependencies: `flask`, `flask-sqlalchemy`, `alembic`, `PyJWT`, `flask-bcrypt`, `python-dotenv`
+- Fixed greenlet Windows build error with `pip install greenlet --only-binary=:all:`
+- Created `app.py` with Flask app init, SQLAlchemy config, and `/health` endpoint — confirmed working in browser
+- Created `.env` with `SECRET_KEY` (gitignored)
+- Created `.gitignore`
+
+### In progress
+- `models.py` — user is actively writing the `User` model (users table only, all four columns: id, email, password_hash, role, created_at)
+
+### Up next
+1. Review `models.py` together once the user finishes writing it
+2. Set up Alembic and run the first migration to create the `users` table in SQLite
+3. Write `/register` and `/login` routes
+
+### Mentoring context
+- Treat the user as a junior developer fresh out of college — explain the "why" behind every decision before writing any code
+- Do NOT write code directly into files — guide the user to write it themselves; only paste short inline snippets in chat to illustrate concepts
+- The user understands syntax but lacks production experience — connect patterns to real-world engineering reasoning
