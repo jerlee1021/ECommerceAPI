@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from extensions import db, bcrypt
 from dotenv import load_dotenv
 import os
 
@@ -9,11 +9,15 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///ecommerce.db"
 
-db = SQLAlchemy(app)
+db.init_app(app)
+bcrypt.init_app(app)
 
 @app.route("/health")
 def health():
     return jsonify({"status": "ok"})
+
+from auth import auth
+app.register_blueprint(auth)
 
 if __name__ == "__main__":
     app.run(debug=True)

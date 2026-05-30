@@ -129,9 +129,9 @@ Do not add tables or columns unless the user explicitly asks.
 Track progress here as the project develops. Update this section as each phase is completed.
 
 - [x] Flask app initialised
-- [ ] Database models defined
-- [ ] Alembic configured
-- [ ] Auth endpoints working
+- [x] Database models defined
+- [x] Alembic configured
+- [ ] Auth endpoints working (`/register` done, `/login` in progress)
 - [ ] Auth decorators working
 - [ ] Product endpoints working
 - [ ] Cart endpoints working
@@ -140,19 +140,25 @@ Track progress here as the project develops. Update this section as each phase i
 ## Session notes — where we left off
 
 ### Completed this session
-- Installed all dependencies: `flask`, `flask-sqlalchemy`, `alembic`, `PyJWT`, `flask-bcrypt`, `python-dotenv`
-- Fixed greenlet Windows build error with `pip install greenlet --only-binary=:all:`
-- Created `app.py` with Flask app init, SQLAlchemy config, and `/health` endpoint — confirmed working in browser
-- Created `.env` with `SECRET_KEY` (gitignored)
-- Created `.gitignore`
+- Defined all four models in `models.py` — `User`, `Product`, `CartItem`, `Order`
+- Set up Alembic, ran initial migration, all four tables created in SQLite
+- Resolved circular import by introducing `extensions.py` — `db` and `bcrypt` now live there; `app.py`, `auth.py`, and `models.py` all import from it
+- Resolved SQLite path mismatch — Alembic now points to `instance/ecommerce.db` (absolute path in `alembic.ini`) to match where Flask-SQLAlchemy creates the file
+- Created `auth.py` as a Flask Blueprint, registered it in `app.py`
+- Wrote and tested `/register` — returns 201 on success, 409 on duplicate email, confirmed working in Postman
 
 ### In progress
-- `models.py` — user is actively writing the `User` model (users table only, all four columns: id, email, password_hash, role, created_at)
+- `/login` — not yet written. Next step is to write it in `auth.py`
 
 ### Up next
-1. Review `models.py` together once the user finishes writing it
-2. Set up Alembic and run the first migration to create the `users` table in SQLite
-3. Write `/register` and `/login` routes
+1. Write `/login` — validate email/password, use `bcrypt.check_password_hash()`, return a signed JWT
+2. Write `@token_required` and `@admin_required` decorators (likely in a new `decorators.py` file)
+3. Product endpoints
+
+### Key decisions made
+- `extensions.py` pattern used to avoid circular imports — always import `db` and `bcrypt` from there, never from `app`
+- Alembic `sqlalchemy.url` set to absolute path: `sqlite:////Users/jeremylee/Desktop/ECommerceAPI/instance/ecommerce.db`
+- `stripe_payment_id` on `Order` set to `nullable=True` — won't exist until Stripe confirms payment
 
 ### Mentoring context
 - Treat the user as a junior developer fresh out of college — explain the "why" behind every decision before writing any code
