@@ -131,8 +131,8 @@ Track progress here as the project develops. Update this section as each phase i
 - [x] Flask app initialised
 - [x] Database models defined
 - [x] Alembic configured
-- [ ] Auth endpoints working (`/register` done, `/login` in progress)
-- [ ] Auth decorators working
+- [x] Auth endpoints working (`/register` and `/login` both done and tested in Postman)
+- [x] Auth decorators working (`@token_required` and `@admin_required` both tested in Postman)
 - [ ] Product endpoints working
 - [ ] Cart endpoints working
 - [ ] Stripe integration working
@@ -140,25 +140,30 @@ Track progress here as the project develops. Update this section as each phase i
 ## Session notes — where we left off
 
 ### Completed this session
-- Defined all four models in `models.py` — `User`, `Product`, `CartItem`, `Order`
-- Set up Alembic, ran initial migration, all four tables created in SQLite
-- Resolved circular import by introducing `extensions.py` — `db` and `bcrypt` now live there; `app.py`, `auth.py`, and `models.py` all import from it
-- Resolved SQLite path mismatch — Alembic now points to `instance/ecommerce.db` (absolute path in `alembic.ini`) to match where Flask-SQLAlchemy creates the file
-- Created `auth.py` as a Flask Blueprint, registered it in `app.py`
-- Wrote and tested `/register` — returns 201 on success, 409 on duplicate email, confirmed working in Postman
+- Wrote and tested `/login` in `auth.py` — uses `bcrypt.check_password_hash()`, returns signed JWT with `user_id`, `role`, `exp`; returns 401 on invalid credentials
+- Wrote `@token_required` and `@admin_required` decorators in `decorators.py`
+  - Both decorators extract token from `Authorization: Bearer <token>` header
+  - Both pass `user_id` and `role` as keyword arguments into the route function
+  - `@admin_required` returns 403 if `role != "admin"`
+- Tested both decorators with temporary routes in `app.py` — confirmed working, routes deleted after testing
+- Promoted `test@example.com` to admin via SQLite directly (`UPDATE users SET role = 'admin' WHERE email = 'test@example.com'`)
+- Created `products.py` as a Flask Blueprint, registered it in `app.py`
 
 ### In progress
-- `/login` — not yet written. Next step is to write it in `auth.py`
+- Product endpoints — `products.py` Blueprint is created and registered but no routes written yet
 
 ### Up next
-1. Write `/login` — validate email/password, use `bcrypt.check_password_hash()`, return a signed JWT
-2. Write `@token_required` and `@admin_required` decorators (likely in a new `decorators.py` file)
-3. Product endpoints
+1. Write `POST /products` — `@admin_required`, accepts `name`, `price`, `stock`, returns 201
+2. Write `GET /products` — public, returns list of all products
+3. Write `GET /products/<id>` — public, returns single product or 404
+4. Cart endpoints after products are done
 
 ### Key decisions made
 - `extensions.py` pattern used to avoid circular imports — always import `db` and `bcrypt` from there, never from `app`
 - Alembic `sqlalchemy.url` set to absolute path: `sqlite:////Users/jeremylee/Desktop/ECommerceAPI/instance/ecommerce.db`
 - `stripe_payment_id` on `Order` set to `nullable=True` — won't exist until Stripe confirms payment
+- Decorators pass `user_id` and `role` as keyword arguments — route functions must declare them as parameters
+- Generic error messages used on auth failures — never reveal whether email or password was the issue
 
 ### Mentoring context
 - Treat the user as a junior developer fresh out of college — explain the "why" behind every decision before writing any code
