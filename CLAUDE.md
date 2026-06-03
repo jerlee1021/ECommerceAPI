@@ -133,30 +133,27 @@ Track progress here as the project develops. Update this section as each phase i
 - [x] Alembic configured
 - [x] Auth endpoints working (`/register` and `/login` both done and tested in Postman)
 - [x] Auth decorators working (`@token_required` and `@admin_required` both tested in Postman)
-- [ ] Product endpoints working
+- [x] Product endpoints working
 - [ ] Cart endpoints working
 - [ ] Stripe integration working
 
 ## Session notes — where we left off
 
 ### Completed this session
-- Wrote and tested `/login` in `auth.py` — uses `bcrypt.check_password_hash()`, returns signed JWT with `user_id`, `role`, `exp`; returns 401 on invalid credentials
-- Wrote `@token_required` and `@admin_required` decorators in `decorators.py`
-  - Both decorators extract token from `Authorization: Bearer <token>` header
-  - Both pass `user_id` and `role` as keyword arguments into the route function
-  - `@admin_required` returns 403 if `role != "admin"`
-- Tested both decorators with temporary routes in `app.py` — confirmed working, routes deleted after testing
-- Promoted `test@example.com` to admin via SQLite directly (`UPDATE users SET role = 'admin' WHERE email = 'test@example.com'`)
-- Created `products.py` as a Flask Blueprint, registered it in `app.py`
+- Wrote and tested all three product endpoints in `products.py`
+  - `POST /products` — `@admin_required`, validates body, creates product, returns 201 with product data
+  - `GET /products` — public, returns list of all products
+  - `GET /products/<id>` — public, returns single product or 404
+- All three tested and confirmed working in Postman
 
 ### In progress
-- Product endpoints — `products.py` Blueprint is created and registered but no routes written yet
+- Cart endpoints — not started yet
 
 ### Up next
-1. Write `POST /products` — `@admin_required`, accepts `name`, `price`, `stock`, returns 201
-2. Write `GET /products` — public, returns list of all products
-3. Write `GET /products/<id>` — public, returns single product or 404
-4. Cart endpoints after products are done
+1. Create `cart.py` Blueprint and register it in `app.py`
+2. Write `POST /cart` — `@token_required`, add a product to the user's cart
+3. Write `DELETE /cart/<product_id>` — `@token_required`, remove a product from cart
+4. Write `GET /cart` — `@token_required`, view cart with running total
 
 ### Key decisions made
 - `extensions.py` pattern used to avoid circular imports — always import `db` and `bcrypt` from there, never from `app`
