@@ -134,26 +134,26 @@ Track progress here as the project develops. Update this section as each phase i
 - [x] Auth endpoints working (`/register` and `/login` both done and tested in Postman)
 - [x] Auth decorators working (`@token_required` and `@admin_required` both tested in Postman)
 - [x] Product endpoints working
-- [ ] Cart endpoints working
+- [x] Cart endpoints working
 - [ ] Stripe integration working
 
 ## Session notes — where we left off
 
 ### Completed this session
-- Wrote and tested all three product endpoints in `products.py`
-  - `POST /products` — `@admin_required`, validates body, creates product, returns 201 with product data
-  - `GET /products` — public, returns list of all products
-  - `GET /products/<id>` — public, returns single product or 404
-- All three tested and confirmed working in Postman
+- Wrote and tested all three cart endpoints in `cart.py`
+  - `POST /cart` — `@token_required`, upsert logic (create or increment quantity), returns 200
+  - `DELETE /cart/<product_id>` — `@token_required`, scoped to authenticated user, returns 200
+  - `GET /cart` — `@token_required`, returns item list and running total, Decimal cast to float
+- All three tested and confirmed working in Postman including upsert edge case
 
 ### In progress
-- Cart endpoints — not started yet
+- Stripe integration — not started yet
 
 ### Up next
-1. Create `cart.py` Blueprint and register it in `app.py`
-2. Write `POST /cart` — `@token_required`, add a product to the user's cart
-3. Write `DELETE /cart/<product_id>` — `@token_required`, remove a product from cart
-4. Write `GET /cart` — `@token_required`, view cart with running total
+1. Install Stripe SDK and add keys to `.env`
+2. Write `POST /checkout` — create a Stripe PaymentIntent from the cart total
+3. Write `POST /webhook` — verify Stripe signature, create order, clear cart
+4. Write `GET /orders` — return past orders for the authenticated user
 
 ### Key decisions made
 - `extensions.py` pattern used to avoid circular imports — always import `db` and `bcrypt` from there, never from `app`
