@@ -25,5 +25,8 @@ app.register_blueprint(products_bp)
 from cart import cart_bp
 app.register_blueprint(cart_bp)
 
+from checkout import checkout_bp
+app.register_blueprint(checkout_bp)
+
 if __name__ == "__main__":
     app.run(debug=True)

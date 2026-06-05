@@ -135,25 +135,19 @@ Track progress here as the project develops. Update this section as each phase i
 - [x] Auth decorators working (`@token_required` and `@admin_required` both tested in Postman)
 - [x] Product endpoints working
 - [x] Cart endpoints working
-- [ ] Stripe integration working
+- [x] Stripe integration working
 
 ## Session notes — where we left off
 
 ### Completed this session
-- Wrote and tested all three cart endpoints in `cart.py`
-  - `POST /cart` — `@token_required`, upsert logic (create or increment quantity), returns 200
-  - `DELETE /cart/<product_id>` — `@token_required`, scoped to authenticated user, returns 200
-  - `GET /cart` — `@token_required`, returns item list and running total, Decimal cast to float
-- All three tested and confirmed working in Postman including upsert edge case
+- Wrote and tested all three Stripe endpoints in `checkout.py`
+  - `POST /checkout` — `@token_required`, creates Stripe PaymentIntent, returns `client_secret`
+  - `POST /webhook` — verifies Stripe signature, creates order, clears cart on `payment_intent.succeeded`
+  - `GET /orders` — `@token_required`, returns past orders for the authenticated user
+- Full flow tested end to end: checkout → confirm payment via Stripe CLI → webhook fires → order created → cart cleared
 
 ### In progress
-- Stripe integration — not started yet
-
-### Up next
-1. Install Stripe SDK and add keys to `.env`
-2. Write `POST /checkout` — create a Stripe PaymentIntent from the cart total
-3. Write `POST /webhook` — verify Stripe signature, create order, clear cart
-4. Write `GET /orders` — return past orders for the authenticated user
+- Nothing — all planned endpoints are complete
 
 ### Key decisions made
 - `extensions.py` pattern used to avoid circular imports — always import `db` and `bcrypt` from there, never from `app`
@@ -161,6 +155,10 @@ Track progress here as the project develops. Update this section as each phase i
 - `stripe_payment_id` on `Order` set to `nullable=True` — won't exist until Stripe confirms payment
 - Decorators pass `user_id` and `role` as keyword arguments — route functions must declare them as parameters
 - Generic error messages used on auth failures — never reveal whether email or password was the issue
+- PaymentIntent created with `automatic_payment_methods={"enabled": True, "allow_redirects": "never"}` — required for CLI-based testing without a frontend
+- Webhook uses `request.data` (raw bytes) not `request.get_json()` — Stripe signature verification requires the raw body
+- Webhook uses `metadata.get("user_id")` not direct key access — guards against generic Stripe test events with no metadata
+- Confirm test payments via: `stripe payment_intents confirm pi_xxx --payment-method pm_card_visa`
 
 ### Mentoring context
 - Treat the user as a junior developer fresh out of college — explain the "why" behind every decision before writing any code
